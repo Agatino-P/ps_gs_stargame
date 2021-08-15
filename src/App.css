@@ -18,17 +18,17 @@
   text-align: center;
 }
 
-.stars {
-  width: 50%;
+.left {
   text-align: center;
-  border: thin solid lightgray;
+  width: 50%;
+  border: thin solid #ddd;
 }
 
-.play-numbers {
-  width: 50%;
+.right {
   text-align: center;
-  border: thin solid lightgray;
   padding: 10px;
+  width: 50%;
+  border: thin solid #ddd;
 }
 
 .star {
@@ -50,14 +50,19 @@
   font-size: 25px;
 }
 
-.play-number:focus, play-number:active {
+.number:focus, .number:active {
   outline: none;
   border: thin solid #ddd;
 }
 
+.timer {
+	color: #666;
+  margin-top: 3px;
+  margin-left: 3px;
+}
+
 .game-done .message {
   font-size: 250%;
-  color: green;
   font-weight: bold;
   margin: 15px;
 }
