@@ -2,11 +2,17 @@ import './App.css';
 import React, { useState } from 'react';
 
 
-function NumberButton(props)
+function PlayNumber(props)
 {
-  const handleClick = ()=>console.log('Num',props.number );
+  const handleClick = ()=>{
+    props.onClick(props.number,props.status);
+  }
   return(
-    <button className="number" onClick={handleClick}> 
+    <button 
+        className ="number" 
+       style={{backgroundColor: colors[props.status]}}
+      onClick={handleClick}
+    > 
       {props.number}
     </button>
   )  
@@ -20,16 +26,48 @@ function StarsDisplay(props){
   );
 }
 
-function ButtonsDisplay(props){
-  return(
-    utils.range(1,9).map(number=>
-      <NumberButton key={number} number={number}/>
-    )
-  );
-}
 
 const App = () => {
   const [stars,setStars] = useState( utils.random(1,9) );
+  
+  const [availableNums,setAvailableNums] = useState (utils.range(1,9));
+  const [candidateNums,setCandidateNums] = useState ([]);
+  
+  const candidatesAreWrong = utils.sum(candidateNums) > stars;
+  
+  const numberStatus = (number) =>{
+    if (!availableNums.includes(number)) return 'used';
+    if (candidateNums.includes(number))
+      return (candidatesAreWrong ? 'wrong' : 'candidate');
+    return 'available'
+  }
+
+  const onNumberClick = (number,currentStatus) =>
+  {
+    if (currentStatus === 'used') return;
+
+    const newCandidateNums =
+      (currentStatus === 'candidate') ?
+      candidateNums.filter(n=>n!==number) :
+      candidateNums.concat(number)
+    
+
+    const sumCandidates = utils.sum(newCandidateNums);
+    console.log('sumCandidates',sumCandidates);
+
+    if (sumCandidates!== stars )
+    {
+      setCandidateNums(newCandidateNums);
+    }
+    else 
+    {
+        const newAvailableNums=availableNums.filter(n=> !newCandidateNums.includes(n));
+        setStars(utils.randomSumIn(newAvailableNums,9)) 
+        setAvailableNums(newAvailableNums)
+        setCandidateNums([]);
+    }
+  }
+
   return (
     <div className="game">
       <div className="help">
@@ -40,7 +78,16 @@ const App = () => {
           <StarsDisplay numStars={stars}/>
         </div>
         <div className="right">
-          <ButtonsDisplay/>
+          {
+            utils.range(1,9).map(number=>
+              <PlayNumber 
+                key={number}
+                number={number}
+                status={numberStatus(number)}
+                onClick={onNumberClick}
+                />
+            )
+          }
         </div>
       </div>
       <div className="timer">Time Remaining: 10</div>
