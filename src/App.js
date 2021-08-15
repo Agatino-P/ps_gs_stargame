@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 
 function PlayNumber(props)
@@ -20,13 +20,28 @@ function PlayNumber(props)
 
 const PlayAgain= (props) => {
   return(
+    <div className = "game-done">
 
-    <button
-    onClick={props.onClick}
-    className="game-done">
-      Play Again
-    </button>
-      );
+      <div 
+        className = "message"
+        style={{
+          color: (props.gameStatus==='won' ? 'green' : 'red') 
+        }}
+      > 
+        {props.gameStatus === 'won' ?
+          <p>Won!</p> :
+          <p>Lost!</p>
+        }
+      </div>
+
+      <button
+        onClick={props.onClick}
+        className="game-done">
+        Play Again
+      </button>
+
+  </div>
+  );
 }
 
 function StarsDisplay(props){
@@ -42,9 +57,23 @@ const App = () => {
   const [stars,setStars] = useState( utils.random(1,9) );
   const [availableNums,setAvailableNums] = useState (utils.range(1,9));
   const [candidateNums,setCandidateNums] = useState ([]);
+  const [secondsLeft,setSecondsLeft] = useState(10);
   
+   useEffect( () =>{
+    if (secondsLeft>0 && gameStatus === 'active')
+    {
+      const timerId = setTimeout( ()=> {setSecondsLeft(secondsLeft-1)} ,1000);
+      return () => clearTimeout(timerId); 
+    };
+  });
+
+
   const candidatesAreWrong = utils.sum(candidateNums) > stars;
-  const gameIsDone = availableNums.length === 0;
+  const gameStatus = availableNums.length === 0 ?
+    'won':
+    secondsLeft === 0 ?
+      'lost' :
+      'active';
   
   const numberStatus = (number) =>{
     if (!availableNums.includes(number)) return 'used';
@@ -55,8 +84,7 @@ const App = () => {
 
   const onNumberClick = (number,currentStatus) =>
   {
-    if (currentStatus === 'used') return;
-
+    if (currentStatus === 'used' || gameStatus !== 'active') return;
     const newCandidateNums =
       (currentStatus === 'candidate') ?
       candidateNums.filter(n=>n!==number) :
@@ -64,7 +92,7 @@ const App = () => {
     
 
     const sumCandidates = utils.sum(newCandidateNums);
-    if (sumCandidates!== stars )
+    if (sumCandidates!== stars ) 
     {
       setCandidateNums(newCandidateNums);
     }
@@ -80,6 +108,7 @@ const resetGame= ()=>{
   setStars( utils.random(1,9) );
   setAvailableNums (utils.range(1,9));
   setCandidateNums ([]);
+  setSecondsLeft(10);
 };
 
   return (
@@ -90,8 +119,8 @@ const resetGame= ()=>{
       <div className="body">
         <div className="left">
           {
-            gameIsDone?
-            (<PlayAgain onClick={resetGame}/>) :
+            gameStatus !== 'active'?
+            (<PlayAgain onClick={resetGame} gameStatus={gameStatus}/>) :
             (<StarsDisplay numStars={stars}/>)
 
           }
@@ -109,7 +138,7 @@ const resetGame= ()=>{
           }
         </div>
       </div>
-      <div className="timer">Time Remaining: 10</div>
+      <div className="timer">Time Remaining: {secondsLeft}</div>
     </div>
   );
 };
