@@ -53,7 +53,7 @@ function StarsDisplay(props){
 }
 
 
-const App = () => {
+const Game = (props) => {
   const [stars,setStars] = useState( utils.random(1,9) );
   const [availableNums,setAvailableNums] = useState (utils.range(1,9));
   const [candidateNums,setCandidateNums] = useState ([]);
@@ -67,13 +67,9 @@ const App = () => {
     };
   });
 
-
   const candidatesAreWrong = utils.sum(candidateNums) > stars;
-  const gameStatus = availableNums.length === 0 ?
-    'won':
-    secondsLeft === 0 ?
-      'lost' :
-      'active';
+  const gameStatus = availableNums.length === 0 ? 'won':
+    (secondsLeft === 0 ? 'lost' :  'active');
   
   const numberStatus = (number) =>{
     if (!availableNums.includes(number)) return 'used';
@@ -104,13 +100,7 @@ const App = () => {
         setCandidateNums([]);
     }
   }
-const resetGame= ()=>{
-  setStars( utils.random(1,9) );
-  setAvailableNums (utils.range(1,9));
-  setCandidateNums ([]);
-  setSecondsLeft(10);
-};
-
+  
   return (
     <div className="game">
       <div className="help">
@@ -120,7 +110,7 @@ const resetGame= ()=>{
         <div className="left">
           {
             gameStatus !== 'active'?
-            (<PlayAgain onClick={resetGame} gameStatus={gameStatus}/>) :
+            (<PlayAgain onClick={props.resetCB} gameStatus={gameStatus}/>) :
             (<StarsDisplay numStars={stars}/>)
 
           }
@@ -143,6 +133,15 @@ const resetGame= ()=>{
   );
 };
 
+const App = () =>
+{
+  const [gameId,setGameId] = useState(1);
+  const resetCB = () => setGameId(gameId === 1? 2 :1)
+
+  return(
+    <Game key={gameId}  resetCB = {resetCB}/>
+  );
+}
 
 // Color Theme
 const colors = {
@@ -181,7 +180,5 @@ const utils = {
     return sums[utils.random(0, sums.length - 1)];
   },
 };
-
-
 
 export default App;
